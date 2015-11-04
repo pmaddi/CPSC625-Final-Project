@@ -2,7 +2,7 @@ import collections
 import pickledb
 
 Queue = collections.deque()
-LastPopped = None
+LastPopped = [None]
 
 class Log(collections.deque):
     pass
@@ -12,9 +12,8 @@ class Runtime(object):
         self.db = db
         self.local_horizon = collections.defaultdict(lambda : 0)
         self.upcalls = upcalls
-
     def global_horizon(self, id):
-        h = db.get(hash(str(id) + ':' + 'count'))
+        h = self.get(str(id) + ':' + 'count')
         if h:
             return h
         else:
@@ -28,19 +27,21 @@ class Runtime(object):
     def get_entry(self, id, index):
         return self.get(str(id) + ':' + str(index))
     def read(self, id, index):
-        if self.local_horizon[id] <= index:
+        # print id, index, self.local_horizon[id]
+        if self.local_horizon[id] >= index:
             return None
         # follow dependencies
-        val = get_entry(id, index)
+        val = self.get_entry(id, index)
+        # print val
         if val != None:
             for n_id, n_index in val[0]:
-                read(n_id, n_index)
+                self.read(n_id, n_index)
             self.local_horizon[id] += 1
             # upcall
+            print 'make upcall', id, 'with arg', val[1]
             self.upcalls[id](val[1])
         else:
             return None
-
 # API
     def append(self, id, dependencies, data):
     # id is a column id
@@ -48,13 +49,13 @@ class Runtime(object):
     # data are of the datatype
     # return an index
         horizon = self.global_horizon(id)
+        # print "(dependencies, data)", (dependencies, data)
         self.set_entry(id, horizon + 1, (dependencies, data))
         # Check if false?
-        db.set(hash(str(id) + ':' + 'count'), horizon + 1)
+        self.set(str(id) + ':' + 'count', horizon + 1)
         db.dump()
         return horizon + 1
     def read_next(self, id):
-        # where to store upcalls
         seen = self.local_horizon[id]
         return self.read(id, seen + 1)
     def play_forward(self, id):
@@ -69,35 +70,35 @@ if __name__ == '__main__':
     def upcallE(data):
         Queue.append(data)
     def upcallD(data):
-        LastPopped = Queue.popleft(data)
-        print "LastPopped", LastPopped
+        LastPopped[0] = Queue.popleft()
+        # print "LastPopped", LastPopped
     upcalls = (upcallE, upcallD)
     runtime = Runtime(db, upcalls)
     def enqueue(data):
+        # print "append to E"
         runtime.append(0, (), data)
     def dequeue():
         runtime.play_forward(1)
         runtime.read_next(0)
         if not Queue:
+            # print 'ret none'
             return None
+        else:
+            pass
+            # print list(Queue)
         last_seen_d = runtime.local_horizon[1]
         to_dequeue = runtime.local_horizon[0]
-        d_loc = runtime.append(1, ((0, to_dequeue)), 0)
+        # print "append to D"
+        d_loc = runtime.append(1, ((0, to_dequeue),), 0)
+        runtime.read_next(1)
         if d_loc == last_seen_d + 1:
-            return LastPopped
+            return LastPopped[0]
     enqueue(1)
-    print Queue
     enqueue(2)
-    print Queue
     enqueue(3)
-    print Queue
-    dequeue()
-    print Queue
-    dequeue()
-    print Queue
-    dequeue()
-    print Queue
-
-
-
-
+    print dequeue()
+    print dequeue()
+    enqueue(4)
+    print dequeue()
+    print dequeue()
+    print dequeue()
