@@ -1,0 +1,38 @@
+zookeeper
+basic data structures
+    map
+distributed job control
+
+causal ordered distributed system
+    make progress if loose access to some other cols
+    forum, sees up to that point in history
+
+what information to store in transaciton nodes?
+    startE: data, unique tranaton id, commit col, dependencies
+    appends ignore
+
+locks?
+
+balakrisnan:
+I think part of the goal is to figure out how something like DayLight would use data structures backed by the fuzzy log. There are a few useful potential outcomes:
+- you figure out exactly how opendaylight can use a fuzzy log data structure, and actually show the opendaylight controller running against some simulated version of the data structure. this is the best outcome.
+- you figure out how opendaylight can use a fuzzy log data structure, but don’t actually implement it. this is quite a good outcome as well, as long as you provide enough information that we can pick up from where you left off.
+- you find out that there’s really no sensible way for opendaylight to run over a fuzzy log data structure. this is quite reasonable as well, as long as you tell us why.
+
+Basically the hypothesis is that the daylight controller has some local in-memory state that it stores in data structures (like a topology graph, or perhaps flow maps…). We want to identify these data structures, figure out what semantics the controller needs for them (e.g., durability, failure atomicity), how the current system provides such semantics, and whether replacing it with fuzzy log data structures will help…
+
+josh:
+I spoke with Mahesh today and, we have a more concrete idea of what we want you to work on for 625 and you senior thesis,
+there are two parts:
+1. Your choice of the data-centric parts of Zookeeper, or some collections implementations, including a least a Map
+   (see, for instance the Java collections APIs)
+   2. As much of OpenDaylight as you can (most importantly the core)
+     (the wiki and mailing lists are probably more useful than the actual website)
+
+     Since part one is simpler it should probably be the 625 project, but, by the same token, part two is more important.
+
+11/24:
+
+zookeeper:
+    znodes
+    
