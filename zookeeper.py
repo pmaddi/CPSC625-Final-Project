@@ -42,8 +42,10 @@ class Zookeeper:
                 'createMode' : createMode,
                 }
         r = requests.post(self.connectString, data=data_param)
-        print r.url
-        print 'in create', (r.status_code, r.reason, r.json())
+        if r.status_code == 200:
+            return r.json().get('path', None)
+        else:
+            return None
     def delete(self, path, version):
         '''
         deletes
@@ -54,34 +56,76 @@ class Zookeeper:
                 'version' : version,
                 }
         r = requests.post(self.connectString, data=data_param)
-        print (r.status_code, r.reason, r.json())
+        if r.status_code == 200:
+            return True
+        else:
+            return None
     def exists(self, path, watcher):
         '''
         returns stat
         '''
-        r = requests.get('http://github.com', allow_redirects=False)
-        pass
+        data_param = {
+                'command' : 'exists',
+                'path' : path,
+                }
+        r = requests.post(self.connectString, data=data_param)
+        if r.status_code == 200:
+            return r.json().get('stat', None)
+        else:
+            return None
     def get_data(self, path, watcher):
         '''
         returns (data, stat)
         '''
-        r = requests.get('http://github.com', allow_redirects=False)
-        pass
+        data_param = {
+                'command' : 'get_data',
+                'path' : path,
+                }
+        r = requests.post(self.connectString, data=data_param)
+        if r.status_code == 200:
+            return (r.json().get('data', None), r.json().get('stat', None))
+        else:
+            return None
     def set_data(self, path, data, version):
         '''
         returns stat
         '''
-        pass
+        data_param = {
+                'command' : 'set_data',
+                'path' : path,
+                'data' : data,
+                }
+        r = requests.post(self.connectString, data=data_param)
+        if r.status_code == 200:
+            return r.json().get('stat', None)
+        else:
+            return None
     def get_children(self, path, watcher):
         '''
         returns (list of child paths, stat)
         '''
-        pass
+        data_param = {
+                'command' : 'get_children',
+                'path' : path,
+                }
+        r = requests.post(self.connectString, data=data_param)
+        if r.status_code == 200:
+            return r.json().get('stat', None)
+        else:
+            return None
+
     def sync(self, path, callback):
         '''
         flush channel
         '''
-        pass
+        data_param = {
+                'command' : 'sync',
+                }
+        r = requests.post(self.connectString, data=data_param)
+        if r.status_code == 200:
+            return r.json().get('stat', None)
+        else:
+            return
 '''
 create
     creates a node at a location in the tree
@@ -99,23 +143,9 @@ sync
     waits for data to be propagated
 '''
 
-
-class Map:
-    def __init__(self, db):
-        self.db = db
-        self.map_view = {}
-        self.last_popped = [None]
-        upcalls = (self.upcall,)
-        self.runtime = runtime.Runtime(self.db, upcalls)
-    def upcall(self, data):
-        self.map_view[data[0]] = data[1]
-    def get(self, key):
-        self.runtime.play_forward(0)
-        return self.map_view[key]
-    def set(self, key, value):
-        self.runtime.append(0, (), (key, value))
-
 if __name__ == '__main__':
     zk = Zookeeper('http://127.0.0.1:8000', 10000, None)
     path = zk.create('/apple', 'pie', None)
+    res = zk.get_data('/apple', None)
+    print res
 

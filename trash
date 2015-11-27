@@ -1,0 +1,18 @@
+
+class Processor:
+    def create():
+        pass
+    def delete():
+        pass
+    def exists():
+        r = requests.get('http://github.com', allow_redirects=False)
+        pass
+    def get_data():
+        r = requests.get('http://github.com', allow_redirects=False)
+        pass
+    def set_data():
+        pass
+    def get_children():
+        pass
+    def sync():
+        pass
