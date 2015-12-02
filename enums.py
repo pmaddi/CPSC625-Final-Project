@@ -10,7 +10,7 @@ class WatcherStates:
 class ZookeeperStates:
     pass
 
-class KeeperException:
+class KeeperState:
     APIERROR    =  1
     AUTHFAILED  =  2
     BADARGUMENTS    =  3

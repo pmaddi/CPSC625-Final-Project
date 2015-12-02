@@ -2,6 +2,9 @@ import collections
 import pickledb
 import runtime
 
+# maintain a directory trie and a hash of paths to data
+# just one log for now
+
 class WeakMap:
     def __init__(self, db):
         self.db = db
@@ -16,6 +19,9 @@ class WeakMap:
         return self.map_view.get(key, None)
     def set(self, key, value):
         return self.runtime.append(0, (), (key, value))
+    def get_children(self, key):
+        self.runtime.play_forward(0)
+        return [i for i in self.map_view.keys() if i.startswith(key)]
 
 if __name__ == '__main__':
     db = pickledb.load('runtime.db', False)
