@@ -4,6 +4,7 @@ from BaseHTTPServer import BaseHTTPRequestHandler, HTTPServer
 import json
 import mimetools
 import urlparse
+import logging
 
 import pickledb
 import weakmap

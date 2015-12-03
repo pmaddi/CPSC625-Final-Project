@@ -1,6 +1,7 @@
 import collections
 import pickledb
 import runtime
+import logging
 
 # maintain a directory trie and a hash of paths to data
 # just one log for now
@@ -12,13 +13,17 @@ class WeakMap:
         self.last_popped = [None]
         upcalls = (self.upcall,)
         self.runtime = runtime.Runtime(self.db, upcalls)
+
     def upcall(self, data):
         self.map_view[data[0]] = data[1]
+
     def get(self, key):
         self.runtime.play_forward(0)
         return self.map_view.get(key, None)
+
     def set(self, key, value):
         return self.runtime.append(0, (), (key, value))
+
     def get_children(self, key):
         self.runtime.play_forward(0)
         return [i for i in self.map_view.keys() if i.startswith(key)]

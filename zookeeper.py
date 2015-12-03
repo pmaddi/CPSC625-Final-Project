@@ -2,6 +2,7 @@ import collections
 import pickledb
 import runtime
 import requests
+import logging
 
 class Znode:
 # three types
@@ -12,11 +13,8 @@ class Znode:
     def serialize(self):
         pass
 
-
-
 class Stat:
     pass
-
 
 # the client uses this to access the server.
 class Zookeeper:
