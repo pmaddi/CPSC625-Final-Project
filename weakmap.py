@@ -3,6 +3,8 @@ import pickledb
 import runtime
 import logging
 
+import directory
+
 # maintain a directory trie and a hash of paths to data
 # just one log for now
 
@@ -11,6 +13,7 @@ class WeakMap:
         self.db = db
         self.map_view = {}
         self.last_popped = [None]
+        self.fs = directory.Directory()
         upcalls = (self.upcall,)
         self.runtime = runtime.Runtime(self.db, upcalls)
 

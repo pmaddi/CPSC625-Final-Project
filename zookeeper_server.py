@@ -8,7 +8,7 @@ import logging
 
 import pickledb
 import weakmap
-from enums import *
+import enums as e
 
 db = pickledb.load('zookeeper.db', False)
 zoomap = weakmap.WeakMap(db)
@@ -52,33 +52,33 @@ class ZookeeperServer(BaseHTTPRequestHandler):
             # check if directory avalable
             if zoomap.get(path) is not None:
                 out_data['path'] = path
-                out_data['status'] = KeeperState.NODEEXISTS
+                out_data['status'] = e.KeeperState.NODEEXISTS
             elif zoomap.set(path, data):
                 out_data['path'] = path
-                out_data['status'] = KeeperState.OK
+                out_data['status'] = e.KeeperState.OK
             else:
                 out_data['path'] = None
-                out_data['status'] = KeeperState.SYSTEMERROR
+                out_data['status'] = e.KeeperState.SYSTEMERROR
         elif command == 'delete':
             if zoomap.get(path) is not None:
                 zoomap.set(path, None)
                 out_data['path'] = path
-                out_data['status'] = KeeperState.OK
+                out_data['status'] = e.KeeperState.OK
             elif zoomap.get(path) is None:
                 out_data['path'] = path
-                out_data['status'] = KeeperState.NONODE
+                out_data['status'] = e.KeeperState.NONODE
             else:
                 out_data['path'] = None
-                out_data['status'] = KeeperState.SYSTEMERROR
+                out_data['status'] = e.KeeperState.SYSTEMERROR
         elif command == 'exists':
             if zoomap.get(path) is not None:
                 out_data['path'] = path
                 out_data['stat'] = {'time' : 1}
-                out_data['status'] = KeeperState.OK
+                out_data['status'] = e.KeeperState.OK
             else:
                 out_data['path'] = None
                 out_data['stat'] = None
-                out_data['status'] = KeeperState.NONODE
+                out_data['status'] = e.KeeperState.NONODE
         elif command == 'get_data':
             # check if directory avalable
             znode = zoomap.get(path)

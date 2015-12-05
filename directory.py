@@ -1,6 +1,4 @@
 import logging
-logging.basicConfig(level=logging.INFO, format='%(asctime)s %(message)s')
-
 
 def _input_path_sanitizer(func):
     def inner(trie, path):
@@ -8,7 +6,6 @@ def _input_path_sanitizer(func):
             raise SyntaxError("Path must starts with a / character")
         return func(trie, path)
     return inner
-
 
 class _Trie(object):
 
@@ -61,7 +58,27 @@ class _Trie(object):
 
     @_input_path_sanitizer
     def remove(self, path):
-        pass # this one is a bit harder...
+        logging.info("Removing node {}".format(path))
+        pieces = self.get_pieces(path)
+        temp_trie = self._paths
+        for piece in pieces[:-1]:
+            if piece in temp_trie:
+                temp_trie = temp_trie[piece]
+            else:
+                logging.warning("Parent node does not exist")
+                return None
+                # raise SyntaxError("Parent node does not exist")
+        if pieces:
+            if pieces[-1] in temp_trie:
+                del temp_trie[pieces[-1]]
+            else:
+                logging.warning("Node doesn't exist")
+                return None
+                temp_trie[pieces[-1]] = {}
+        else:
+            logging.error("Something bad")
+            return None
+        return path
 
     @property
     def paths(self):
@@ -71,46 +88,51 @@ class _Trie(object):
     def end(self):
         return self.__end
 
-class FakeFs(object):
+class Directory(object):
 
     def __init__(self):
         self._dirs = _Trie()
-        self._paths = set("/")
+        self._data = {"/" : None}
 
-    def mknode(self, directory):
+    def mknode(self, directory, data=None):
         if self._dirs.add(directory):
-            self._paths.add(directory)
+            self._data[directory] = data
 
-
-    def dir_exists(self, dir_path):
+    def exists(self, dir_path):
         return self._dirs.exists(dir_path)
 
     def rm(self, dir_path):
-        if self.dir_exists(dir_path):
-            return self._dirs.remove(dir_path)
+        if self._dirs.remove(dir_path):
+            path_data = self._data.pop(dir_path, None)
+            # TODO delete all children
+            return (dir_path, path_data, "stat")
         else:
             logging.error("Cannot remove directory.")
+            return None
 
-    def rmdir(self, directory):
+    def ls(self, path):
         pass
-
-    def touch(self, filename):
-        pass
-
 
     @property
-    def paths(self):
-        return self._paths
+    def data(self):
+        return self._data
 
 if __name__ == '__main__':
-    fs = FakeFs()
+    logging.basicConfig(level=logging.INFO, format='%(asctime)s %(message)s')
+    fs = Directory()
     fs.mknode("/poo/woo/soo/doo/poo")
     fs.mknode("/etc")
+    fs.mknode("/etc/1")
+    fs.mknode("/etc/1/2")
+    fs.mknode("/etc/1/2/3")
+    fs.mknode("/etc/1/2/3/4")
+    fs.rm("/etc/1/2/3")
     fs.mknode("/")
     fs.mknode("/tmp")
     fs.mknode("/tmp/whatever")
+    fs.rm("/tmp/whatever")
     fs.mknode("/var/www/mysite")
     fs.mknode("/etc")
-    fs.dir_exists("/sadsad")
-    fs.dir_exists("/etc")
-    print(fs.paths)
+    fs.exists("/sadsad")
+    fs.exists("/etc")
+    print(fs.data)
