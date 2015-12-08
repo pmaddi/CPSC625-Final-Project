@@ -1,5 +1,6 @@
 import collections
 import pickledb
+import logging
 
 class Transaction(object):
     def __init__(self):
@@ -22,7 +23,7 @@ class Runtime(object):
     def set_entry(self, id, index, value):
         return self.set(str(id) + ':' + str(index), value)
     def get(self, key):
-        return self.db.get(hash(key))
+        return self.db.get(str(hash(key)))
     def get_entry(self, id, index):
         return self.get(str(id) + ':' + str(index))
     def read(self, id, index):
@@ -37,7 +38,7 @@ class Runtime(object):
                 self.read(n_id, n_index)
             self.local_horizon[id] += 1
             # upcall
-            print 'make upcall', id, 'with arg', val[1]
+            logging.info('Make upcall ' + str(id) + ' with arg ' + str(val[1]))
             self.upcalls[id](val[1])
         else:
             return None

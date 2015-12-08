@@ -108,7 +108,7 @@ class Zookeeper:
                 }
         r = requests.post(self.connectString, data=data_param)
         if r.status_code == 200:
-            return r.json().get('stat', None)
+            return (r.json().get('children', None), r.json().get('stat', None))
         else:
             return None
 
@@ -142,8 +142,13 @@ sync
 '''
 
 if __name__ == '__main__':
+    logging.basicConfig(level=logging.INFO, format='%(asctime)s %(message)s')
     zk = Zookeeper('http://127.0.0.1:8000', 10000, None)
     path = zk.create('/apple', 'pie', None)
+    logging.info(path)
+    zk.create('/apple/yosemite', '10.11', None)
+    zk.create('/apple/mavericks', '10.10', None)
     res = zk.get_data('/apple', None)
-    print res
-
+    logging.info(res)
+    res = zk.get_children('/apple', None)
+    logging.info(res)

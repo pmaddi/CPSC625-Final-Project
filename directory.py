@@ -31,18 +31,35 @@ class _Trie(object):
             else:
                 logging.warning("Parent node does not exist")
                 return None
-                # raise SyntaxError("Parent node does not exist")
         if pieces:
             if pieces[-1] in temp_trie:
                 logging.warning("Node already exists")
                 return None
-                # raise SyntaxError("Node already exists")
             else:
                 temp_trie[pieces[-1]] = {}
         else:
             logging.error("Something bad")
             return None
         return path
+
+    @_input_path_sanitizer
+    def can_add(self, path):
+        pieces = self.get_pieces(path)
+        temp_trie = self._paths
+        for piece in pieces[:-1]:
+            if piece in temp_trie:
+                temp_trie = temp_trie[piece]
+            else:
+                logging.warning("Parent node does not exist")
+                return None
+        if pieces:
+            if pieces[-1] in temp_trie:
+                logging.warning("Node already exists")
+                return None
+            else:
+                return True
+        else:
+            return None
 
     @_input_path_sanitizer
     def exists(self, path):
@@ -67,14 +84,12 @@ class _Trie(object):
             else:
                 logging.warning("Parent node does not exist")
                 return None
-                # raise SyntaxError("Parent node does not exist")
         if pieces:
             if pieces[-1] in temp_trie:
                 del temp_trie[pieces[-1]]
             else:
                 logging.warning("Node doesn't exist")
                 return None
-                temp_trie[pieces[-1]] = {}
         else:
             logging.error("Something bad")
             return None
@@ -129,6 +144,9 @@ class Directory(object):
 
     def ls(self, path):
         return self._dirs.ls(path)
+
+    def can_mknode(self, path):
+        return self._dirs.can_add(path)
 
     @property
     def data(self):

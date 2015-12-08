@@ -16,11 +16,12 @@ class WeakMap:
         self.fs = directory.Directory()
         upcalls = (self.upcall,)
         self.runtime = runtime.Runtime(self.db, upcalls)
+        self.runtime.play_forward(0)
 
     def upcall(self, data):
         self.map_view[data[0]] = data[1]
         # add to directory
-        self.map_view[data[0]] = data[1]
+        self.fs.mknode(data[0])
 
     def get(self, key):
         self.runtime.play_forward(0)
@@ -30,15 +31,19 @@ class WeakMap:
         # get lock on log 0
         self.runtime.play_forward(0)
         # verify can add in directory
-        asdf
-        return self.runtime.append(0, (), (key, value))
+        if self.fs.can_mknode(key):
+            return self.runtime.append(0, (), (key, value))
+        else:
+            logging.info("Cannot make node")
+            return False
 
     def get_children(self, key):
         self.runtime.play_forward(0)
-# search in directory
-        return [i for i in self.map_view.keys() if i.startswith(key)]
+        return self.fs.ls(key)
+            # search in directory
+        # return [i for i in self.map_view.keys() if i.startswith(key)]
 
-if __name__ == '__main__':
+def testfn1():
     db = pickledb.load('runtime.db', False)
     map1 = WeakMap(db)
     map1.set(1, 'a')
@@ -49,4 +54,20 @@ if __name__ == '__main__':
     print map2.get(2)
     print map2.get(1)
     print map2.get(75) # fails
+
+def testfn2():
+    db = pickledb.load('runtime.db', False)
+    map1 = WeakMap(db)
+    print map1.set('/tmp', '1')
+    print map1.set('/tmp/a', '2')
+    print map1.set('/tmp/b', '3')
+    print map1.set('/tmp/a/c', '4')
+    print map1.set('/tmp/a/c', '4')
+    print map1.set('/', '4')
+    print map1.get_children('/tmp')
+    print map1.get('/tmp/b')
+
+if __name__ == '__main__':
+    logging.basicConfig(level=logging.INFO, format='%(asctime)s %(message)s')
+    testfn2()
 

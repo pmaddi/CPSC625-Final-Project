@@ -35,7 +35,7 @@ class ZookeeperServer(BaseHTTPRequestHandler):
             data = ""
         input_data = urlparse.parse_qs(data, keep_blank_values=1)
         out_data = {}
-        print input_data
+        logging.info(input_data)
         command = input_data.get('command', None)
         if command:
             if len(command) == 1:
@@ -85,37 +85,46 @@ class ZookeeperServer(BaseHTTPRequestHandler):
             if not znode:
                 out_data['stat'] = None
                 out_data['data'] = None
+                out_data['status'] = e.KeeperState.NONODE
             else:
                 out_data['stat'] = {'time' : 1}
                 out_data['data'] = znode
+                out_data['status'] = e.KeeperState.OK
         elif command == 'set_data':
             znode = zoomap.get(path)
             if not znode:
                 out_data['stat'] = None
                 out_data['data'] = None
+                out_data['status'] = e.KeeperState.SYSTEMERROR
             else:
                 out_data['stat'] = {'time' : 1}
                 out_data['data'] = znode
+                out_data['status'] = e.KeeperState.OK
         elif command == 'get_children':
             children = zoomap.get_children(path)
             if not children:
                 out_data['children'] = None
                 out_data['stat'] = None
+                out_data['status'] = e.KeeperState.NONODE
             else:
                 out_data['children'] = children
                 out_data['stat'] = {'time' : 1}
+                out_data['status'] = e.KeeperState.OK
         elif command == 'sync':
             pass
         self.send_response(200)
         self.end_headers()
+        logging.info("Returning {}".format(json.dumps(out_data)))
         self.wfile.write(json.dumps(out_data));
         return
 
 if __name__  == '__main__':
+    logging.basicConfig(level=logging.INFO, format='%(asctime)s %(message)s')
     try:
+        logging.info('server started')
         server = HTTPServer(('', 8000), ZookeeperServer)
-        print 'server started'
+        logging.info('server started')
         server.serve_forever()
     except KeyboardInterrupt:
-        print 'server shutdown'
+        logging.info('server shutdown')
         server.socket.close()
