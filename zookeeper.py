@@ -18,7 +18,7 @@ class Stat:
 
 # the client uses this to access the server.
 class Zookeeper:
-    def __init__(self, connectString, sessionTimeout, watcher):
+    def __init__(self, connectString, sessionTimeout, watcher=None):
         self.connectString = connectString
         self.sessionTimeout = sessionTimeout
         self.watcher = watcher
@@ -44,6 +44,7 @@ class Zookeeper:
             return r.json().get('path', None)
         else:
             return None
+
     def delete(self, path, version):
         '''
         deletes
@@ -58,7 +59,8 @@ class Zookeeper:
             return True
         else:
             return None
-    def exists(self, path, watcher):
+
+    def exists(self, path, watcher=None):
         '''
         returns stat
         '''
@@ -71,7 +73,8 @@ class Zookeeper:
             return r.json().get('stat', None)
         else:
             return None
-    def get_data(self, path, watcher):
+
+    def get_data(self, path, watcher=None):
         '''
         returns (data, stat)
         '''
@@ -98,7 +101,7 @@ class Zookeeper:
             return r.json().get('stat', None)
         else:
             return None
-    def get_children(self, path, watcher):
+    def get_children(self, path, watcher=None):
         '''
         returns (list of child paths, stat)
         '''

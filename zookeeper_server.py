@@ -121,7 +121,6 @@ class ZookeeperServer(BaseHTTPRequestHandler):
 if __name__  == '__main__':
     logging.basicConfig(level=logging.INFO, format='%(asctime)s %(message)s')
     try:
-        logging.info('server started')
         server = HTTPServer(('', 8000), ZookeeperServer)
         logging.info('server started')
         server.serve_forever()

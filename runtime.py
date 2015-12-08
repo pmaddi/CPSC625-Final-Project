@@ -19,10 +19,12 @@ class Runtime(object):
         else:
             return 0
     def set(self, key, value):
-        return self.db.set(hash(key), value)
+        return self.db.set(str(hash(key)), value)
+        # return self.db.set(hash(key), value)
     def set_entry(self, id, index, value):
         return self.set(str(id) + ':' + str(index), value)
     def get(self, key):
+        # return self.db.get(hash(key))
         return self.db.get(str(hash(key)))
     def get_entry(self, id, index):
         return self.get(str(id) + ':' + str(index))
