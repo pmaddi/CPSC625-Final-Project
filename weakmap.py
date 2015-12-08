@@ -19,16 +19,23 @@ class WeakMap:
 
     def upcall(self, data):
         self.map_view[data[0]] = data[1]
+        # add to directory
+        self.map_view[data[0]] = data[1]
 
     def get(self, key):
         self.runtime.play_forward(0)
         return self.map_view.get(key, None)
 
     def set(self, key, value):
+        # get lock on log 0
+        self.runtime.play_forward(0)
+        # verify can add in directory
+        asdf
         return self.runtime.append(0, (), (key, value))
 
     def get_children(self, key):
         self.runtime.play_forward(0)
+# search in directory
         return [i for i in self.map_view.keys() if i.startswith(key)]
 
 if __name__ == '__main__':

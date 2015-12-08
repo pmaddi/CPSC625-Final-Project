@@ -80,6 +80,23 @@ class _Trie(object):
             return None
         return path
 
+    @_input_path_sanitizer
+    def ls(self, path):
+        pieces = self.get_pieces(path)
+        temp = self._paths
+        for piece in pieces:
+            if piece not in temp:
+                logging.info("{} does not exist".format(path))
+                return False
+            temp = temp[piece]
+        out = [
+                path + '/' + i
+                for i
+                in temp.keys()
+             ]
+        return out
+
+
     @property
     def paths(self):
         return self._paths
@@ -111,7 +128,7 @@ class Directory(object):
             return None
 
     def ls(self, path):
-        pass
+        return self._dirs.ls(path)
 
     @property
     def data(self):
@@ -124,6 +141,7 @@ if __name__ == '__main__':
     fs.mknode("/etc")
     fs.mknode("/etc/1")
     fs.mknode("/etc/1/2")
+    print fs.ls("/etc")
     fs.mknode("/etc/1/2/3")
     fs.mknode("/etc/1/2/3/4")
     fs.rm("/etc/1/2/3")

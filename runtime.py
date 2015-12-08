@@ -1,6 +1,11 @@
 import collections
 import pickledb
 
+class Transaction(object):
+    def __init__(self):
+        pass
+    def commit(self, dependencies, data):
+        pass
 class Runtime(object):
     def __init__(self, db, upcalls):
         self.db = db
@@ -55,6 +60,13 @@ class Runtime(object):
     def play_forward(self, id):
         while self.local_horizon[id] < self.global_horizon(id):
             self.read_next(id)
+    def start_transaction(self, ids):
+        '''
+        Read forward the id's
+          if all transactions are committed
+          then add transaction start entries to the ids, containing the min id
+        '''
+        return Transaction()
 
 # id : (index, dependencies, data)
 # id+
