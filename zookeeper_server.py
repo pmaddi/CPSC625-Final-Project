@@ -5,6 +5,7 @@ import json
 import mimetools
 import urlparse
 import logging
+import time
 
 import pickledb
 import weakmap
@@ -12,14 +13,22 @@ import enums as e
 
 db = pickledb.load('zookeeper.db', False)
 zoomap = weakmap.WeakMap(db)
+
 class ZookeeperServer(BaseHTTPRequestHandler):
+
     def do_GET(self):
         self.send_response(200)
         self.send_header('Content-type','text/html')
         self.end_headers()
         self.wfile.write('hi')
         return
+
+    def log_message(self, format, *args):
+        return
+
     def do_POST(self):
+        # start timer
+        start_time = time.time()
         global rootnode
         ctype, pdict = cgi.parse_header(self.headers.getheader('content-type'))
         clength = self.headers.getheader('content-length')
@@ -116,6 +125,7 @@ class ZookeeperServer(BaseHTTPRequestHandler):
         self.end_headers()
         logging.info("Returning {}".format(json.dumps(out_data)))
         self.wfile.write(json.dumps(out_data));
+        print command + ' , ' + str(time.time() - start_time)
         return
 
 if __name__  == '__main__':

@@ -8,26 +8,33 @@ class Transaction(object):
     def commit(self, dependencies, data):
         pass
 class Runtime(object):
+
     def __init__(self, db, upcalls):
         self.db = db
         self.local_horizon = collections.defaultdict(lambda : 0)
         self.upcalls = upcalls
+
     def global_horizon(self, id):
         h = self.get(str(id) + ':' + 'count')
         if h:
             return h
         else:
             return 0
+
     def set(self, key, value):
         return self.db.set(str(hash(key)), value)
         # return self.db.set(hash(key), value)
+
     def set_entry(self, id, index, value):
         return self.set(str(id) + ':' + str(index), value)
+
     def get(self, key):
         # return self.db.get(hash(key))
         return self.db.get(str(hash(key)))
+
     def get_entry(self, id, index):
         return self.get(str(id) + ':' + str(index))
+
     def read(self, id, index):
         # print id, index, self.local_horizon[id]
         if self.local_horizon[id] >= index:
@@ -44,6 +51,7 @@ class Runtime(object):
             self.upcalls[id](val[1])
         else:
             return None
+
 # API
     def append(self, id, dependencies, data):
     # id is a column id
@@ -57,12 +65,15 @@ class Runtime(object):
         self.set(str(id) + ':' + 'count', horizon + 1)
         self.db.dump()
         return horizon + 1
+
     def read_next(self, id):
         seen = self.local_horizon[id]
         return self.read(id, seen + 1)
+
     def play_forward(self, id):
         while self.local_horizon[id] < self.global_horizon(id):
             self.read_next(id)
+
     def start_transaction(self, ids):
         '''
         Read forward the id's
